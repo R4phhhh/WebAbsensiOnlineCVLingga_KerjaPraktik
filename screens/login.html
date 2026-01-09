@@ -5,17 +5,180 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CV. LINGGA - Login</title>
-    <link rel="stylesheet" href="style.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .left-section {
+            width: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            color: white;
+        }
+
+        .left-section h1 {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .right-section {
+            width: 50%;
+            background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .content h2 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            color: #1a1a1a;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            margin-top: 20px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+            margin-bottom: 4px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input::placeholder {
+            color: #aaa;
+        }
+
+        #loginBtn {
+            width: 100%;
+            padding: 14px;
+            background: #4361ee;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 24px;
+        }
+
+        #loginBtn:hover {
+            background: #3451d1;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        #loginBtn:active {
+            transform: translateY(0);
+        }
+
+        #backToLoginBtn {
+            width: 100%;
+            padding: 14px;
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            display: none;
+        }
+
+        #status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        #status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        #status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .left-section,
+            .right-section {
+                width: 100%;
+            }
+
+            .left-section {
+                padding: 40px 20px;
+                min-height: 150px;
+            }
+
+            .left-section h1 {
+                font-size: 36px;
+            }
+        }
     </style>
 </head>
 
 <body>
+    <!-- Left Section with Gradient -->
     <div class="left-section">
         <h1>CV. LINGGA</h1>
     </div>
 
+    <!-- Right Section with Login Form -->
     <div class="right-section">
+        <!-- KONTEN LOGIN -->
         <div class="content">
             <h2>Selamat datang!</h2>
 
@@ -72,22 +235,19 @@
             measurementId: "G-5Z3KJ0ZGMQ"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Tambahkan timeout untuk firestore connection
         const firestoreTimeout = setTimeout(() => {
             console.warn("Firestore connection timeout - mungkin masalah koneksi internet atau rules");
-            // Lanjutkan dengan mode offline jika diperlukan
         }, 10000);
 
         const goRegister = document.getElementById("goRegister");
 
         if (goRegister) {
         goRegister.addEventListener("click", () => {
-            window.location.href = "register.html"; // ganti sesuai nama file daftar kamu
+            window.location.href = "register.html";
         });
         }
 
@@ -98,7 +258,6 @@
             const passwordInput = document.getElementById("password");
             const statusDiv = document.getElementById("status");
 
-            // Tambahkan event listener untuk Enter key
             passwordInput.addEventListener("keypress", (e) => {
                 if (e.key === "Enter") {
                     loginBtn.click();
@@ -107,7 +266,6 @@
 
             const forgotPassword = document.getElementById("forgotPassword");
 
-            // state and related elements for "Lupa password" mode
             let isForgotMode = false;
             const forgotWrapper = document.getElementById("forgotWrapper");
             const registerWrapper = document.getElementById("registerWrapper");
@@ -124,7 +282,6 @@
                 loginBtn.textContent = "Kirim Reset Password";
                 backBtn.style.display = "block";
 
-                // bersihin status
                 statusDiv.style.display = "none";
                 statusDiv.className = "";
                 statusDiv.innerText = "";
@@ -142,7 +299,6 @@
 
                 passwordInput.value = "";
 
-                // HILANGKAN NOTIF
                 statusDiv.style.display = "none";
                 statusDiv.className = "";
                 statusDiv.innerText = "";
@@ -156,16 +312,12 @@
                     return;
                 }
 
-                // =============================
-                // MODE LUPA PASSWORD
-                // =============================
                 if (isForgotMode) {
                     try {
                         statusDiv.className = "";
                         statusDiv.innerText = "Mengirim email reset password...";
                         statusDiv.style.display = "block";
 
-                        // Cek email di Firestore admin
                         const q = query(
                             collection(db, "admin"),
                             where("email", "==", email)
@@ -193,9 +345,6 @@
                     return;
                 }
 
-                // =============================
-                // MODE LOGIN NORMAL
-                // =============================
                 const password = passwordInput.value;
 
                 if (!password) {
@@ -218,7 +367,6 @@
                         return;
                     }
 
-                    // Cek admin
                     const q = query(
                         collection(db, "admin"),
                         where("email", "==", user.email)
@@ -249,19 +397,16 @@
                 }
             });
 
-            // Fungsi helper untuk menampilkan error
             function showError(message) {
                 statusDiv.className = "error";
                 statusDiv.innerText = message;
                 statusDiv.style.display = "block";
 
-                // Auto hide error setelah 5 detik
                 setTimeout(() => {
                     statusDiv.style.display = "none";
                 }, 5000);
             }
 
-            // Fungsi untuk handle berbagai jenis auth error
             function handleAuthError(error) {
                 let errorMessage = "Login gagal: ";
 
@@ -291,20 +436,11 @@
                 showError(errorMessage);
             }
 
-            // auth.onAuthStateChanged((user) => {
-            //     if (user) {
-            //         console.log("Sudah login sebagai:", user.email);
-            //         window.location.href = "proyek_aktif.html";
-            //     }
-            // });
-
-            // Clear timeout saat komponen unmount
             window.addEventListener('beforeunload', () => {
                 clearTimeout(firestoreTimeout);
             });
         });
 
-        // Export untuk testing jika diperlukan
         window.auth = auth;
         window.db = db;
     </script>

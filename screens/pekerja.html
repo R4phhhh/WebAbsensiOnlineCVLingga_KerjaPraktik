@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pekerja - CV. LINGGA</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
-    <link rel="stylesheet" href="style.css">
     <style>
         * {
             margin: 0;
@@ -520,7 +519,6 @@
             </button>
         </div>
 
-        <!-- Tab Pekerja Individual -->
         <div class="tab-content active" id="content-pekerja">
             <div class="search-container">
                 <i data-feather="search" class="search-icon"></i>
@@ -552,7 +550,6 @@
             </div>
         </div>
 
-        <!-- Tab Tim Pekerja -->
         <div class="tab-content" id="content-tim">
             <div class="search-container">
                 <i data-feather="search" class="search-icon"></i>
@@ -584,7 +581,6 @@
         </div>
     </div>
 
-    <!-- Modal Pekerja -->
     <div class="modal" id="modalPekerja">
         <div class="modal-content">
             <div class="modal-header">
@@ -614,7 +610,6 @@
         </div>
     </div>
 
-    <!-- Modal Tim -->
     <div class="modal" id="modalTim">
         <div class="modal-content">
             <div class="modal-header">
@@ -650,7 +645,6 @@
         </div>
     </div>
 
-    <!-- Modal Delete Pekerja -->
     <div class="modal" id="deleteModalPekerja">
         <div class="modal-content">
             <div class="modal-header">
@@ -672,7 +666,6 @@
         </div>
     </div>
 
-    <!-- Modal Delete Tim -->
     <div class="modal" id="deleteModalTim">
         <div class="modal-content">
             <div class="modal-header">
@@ -717,7 +710,6 @@
         let deleteTimId = null;
         let allPekerja = [];
 
-        // Auth State
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = 'login.html';
@@ -760,7 +752,6 @@
             }
         });
 
-        // Tab Switching
         window.switchTab = function(tab) {
             currentTab = tab;
             
@@ -784,7 +775,6 @@
             }
         };
 
-        // ============= PEKERJA FUNCTIONS =============
         window.openModalPekerja = function(editId = null) {
             currentEditId = editId;
 
@@ -943,11 +933,9 @@
             }
         };
 
-        // ============= TIM FUNCTIONS =============
         window.openModalTim = async function(editId = null) {
             currentEditId = editId;
 
-            // Load pekerja untuk selector
             await loadPekerjaSelector();
 
             if (editId) {
@@ -1011,7 +999,6 @@
                     const data = docSnap.data();
                     document.getElementById('namaTim').value = data.nama_tim;
                     
-                    // Check pekerja yang sudah ada di tim
                     const pekerjaIds = data.pekerja.map(p => p.id);
                     document.querySelectorAll('#pekerjaSelector input[type="checkbox"]').forEach(cb => {
                         cb.checked = pekerjaIds.includes(cb.value);

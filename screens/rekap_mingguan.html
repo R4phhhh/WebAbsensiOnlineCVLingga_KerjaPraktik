@@ -602,7 +602,6 @@
         let maxWeekStart;
 
         function formatDate(d) {
-            // Format tanggal ke YYYY-MM-DD menggunakan timezone lokal (bukan UTC)
             const date = new Date(d);
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -667,14 +666,11 @@
             ));
             const proyek = proyekSnap.docs[0].data();
 
-            // ⬅️ batas kiri: minggu mulai proyek
             let tanggalMulai;
 
-            // fallback aman
             if (proyek.tanggalMulai) {
                 tanggalMulai = new Date(proyek.tanggalMulai);
             } else {
-                // fallback paling aman: 1 Januari tahun ini
                 tanggalMulai = new Date(new Date().getFullYear(), 0, 1);
             }
 
@@ -705,7 +701,6 @@
         }
 
         async function fetchAndRenderData() {
-            // Reset data
             rekapData = [];
             pekerjaSet = new Set();
             keteranganIzin = [];
@@ -714,17 +709,14 @@
             const endDate = new Date(startDate);
             endDate.setDate(startDate.getDate() + 6);
 
-            // Build tanggal list
             tanggalList = [];
             for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
                 tanggalList.push(new Date(d));
             }
 
-            // Update display
             document.getElementById('periodText').textContent = `Periode: ${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}`;
             document.getElementById('weekDisplay').textContent = `${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}`;
 
-            // Fetch data absensi
             const q = query(
                 collection(db, "absensi"),
                 where("proyekId", "==", projectId)
@@ -763,7 +755,6 @@
             const tableHead = document.getElementById("tableHead");
             const tableBody = document.getElementById("tableBody");
 
-            // Render header
             let headerHTML = '<tr><th>Nama Pekerja</th>';
             tanggalList.forEach(d => {
                 headerHTML += `<th class="day-header center">
@@ -774,7 +765,6 @@
             headerHTML += '<th class="center">Persentase Kehadiran</th></tr>';
             tableHead.innerHTML = headerHTML;
 
-            // Render body
             let bodyHTML = '';
             pekerjaSet.forEach(nama => {
                 let hadirCount = 0;
@@ -834,12 +824,10 @@
 
             tableBody.innerHTML = bodyHTML || '<tr><td colspan="10" style="text-align: center; padding: 40px; color: #999;">Tidak ada data</td></tr>';
 
-            // Render keterangan - diurutkan berdasarkan tanggal
             const ketEl = document.getElementById("keteranganList");
             if (keteranganIzin.length > 0) {
-                // Sort keterangan berdasarkan tanggal (format: YYYY-MM-DD di awal string)
                 const sortedKeterangan = keteranganIzin.sort((a, b) => {
-                    const dateA = a.substring(0, 10); // ambil YYYY-MM-DD
+                    const dateA = a.substring(0, 10);
                     const dateB = b.substring(0, 10);
                     return dateA.localeCompare(dateB);
                 });
@@ -879,7 +867,6 @@
             const wb = XLSX.utils.book_new();
             const wsData = [];
 
-            // Header
             const startDate = new Date(currentWeekStart);
             const endDate = new Date(startDate);
             endDate.setDate(startDate.getDate() + 6);
@@ -887,14 +874,12 @@
             wsData.push([`Periode: ${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}`]);
             wsData.push([]);
 
-            // Header hari
             wsData.push([
                 "Hari",
                 ...tanggalList.map(d => getHariIndonesia(d)),
                 "Persentase Kehadiran"
             ]);
 
-            // Header tanggal
             wsData.push([
                 "Tanggal",
                 ...tanggalList.map(d => formatDate(d)),
@@ -903,7 +888,6 @@
 
             wsData.push(["Nama Pekerja"]);
 
-            // Data pekerja
             pekerjaSet.forEach(nama => {
                 let hadir = 0;
                 let hariAktif = 0;
@@ -949,7 +933,6 @@
                 wsData.push(row);
             });
 
-            // Keterangan
             wsData.push([]);
             wsData.push(["Keterangan:"]);
             keteranganIzin.forEach(k => {
@@ -958,7 +941,6 @@
 
             const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-            // Format persentase
             const persenCol = tanggalList.length + 1;
             for (let r = 5; r < 5 + pekerjaSet.size; r++) {
                 const cellRef = XLSX.utils.encode_cell({ r, c: persenCol });

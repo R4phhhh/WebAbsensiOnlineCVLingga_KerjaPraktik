@@ -575,7 +575,6 @@
             }
 
             try {
-                // Cari admin berdasarkan email login
                 const q = query(
                     collection(db, "admin"),
                     where("email", "==", user.email)
@@ -584,19 +583,15 @@
                 const snap = await getDocs(q);
 
                 if (snap.empty) {
-                    // JANGAN alert, ini normal saat create user
                     return;
                 }
 
-                // Ambil 1 data admin (harusnya cuma 1)
                 const adminDoc = snap.docs[0];
                 const adminData = adminDoc.data();
 
-                // 🔥 Update profil kiri bawah
                 document.querySelector('.user-name').textContent = adminData.nama;
                 document.querySelector('.user-email').textContent = adminData.email;
 
-                // Avatar: gambar base64 ATAU inisial
                 const avatarEl = document.querySelector('.user-avatar');
 
                 if (adminData.avatar && adminData.avatar.startsWith("data:image")) {
@@ -629,13 +624,8 @@
             if (editId) {
                 document.getElementById('modalTitle').textContent = 'Edit Supervisor';
 
-                // 🔒 Email tidak bisa diubah
                 emailInput.disabled = true;
-
-                // ❌ Sembunyikan input password
                 passwordGroup.style.display = 'none';
-
-                // ✅ Tampilkan tombol reset password
                 resetPasswordGroup.style.display = 'block';
 
                 loadEditData(editId);
@@ -688,7 +678,6 @@
             const password = document.getElementById('password').value;
 
             try {
-                // 🔒 CEK NO HP DUPLIKAT (HANYA SAAT TAMBAH)
                 if (!currentEditId) {
                     const q = query(
                         collection(db, "supervisors"),
@@ -721,7 +710,6 @@
                     await updateDoc(doc(db, "supervisors", currentEditId), updateData);
                     alert("Supervisor berhasil diperbarui");
                 } else {
-                    // ➕ TAMBAH SUPERVISOR BARU
                     const userCred = await createUserWithEmailAndPassword(
                         secondaryAuth,
                         email,

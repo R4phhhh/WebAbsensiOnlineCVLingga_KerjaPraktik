@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil - CV. LINGGA</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
-    <link rel="stylesheet" href="style.css">
     <style>
         * {
             margin: 0;
@@ -672,7 +671,6 @@
             document.getElementById('profilePhone').textContent = currentUser.nohp || '-';
             document.getElementById('profileAddress').textContent = currentUser.alamat || '-';
 
-            // Display avatar
             if (currentUser.avatar && currentUser.avatar.startsWith('data:image')) {
                 document.getElementById('profileAvatarImg').src = currentUser.avatar;
                 document.getElementById('profileAvatarImg').style.display = 'block';
@@ -698,7 +696,6 @@
             document.getElementById('editNohp').value = currentUser.nohp || '';
             document.getElementById('editAlamat').value = currentUser.alamat || '';
 
-            // Display current avatar
             if (currentUser.avatar && currentUser.avatar.startsWith('data:image')) {
                 document.getElementById('avatarPreviewImg').src = currentUser.avatar;
                 document.getElementById('avatarPreviewImg').style.display = 'block';

@@ -155,7 +155,6 @@
 
         .btn-rekap {
             background: #8b5cf6;
-            /* ungu */
             color: white;
         }
 
@@ -290,9 +289,7 @@
 
         .pekerja-list {
             max-height: 420px;
-            /* tinggi tetap */
             overflow-y: auto;
-            /* scroll di sini */
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -340,7 +337,6 @@
         .pekerja-position {
             font-size: 13px;
             color: #6b7280;
-            /* abu-abu soft */
             margin-top: 2px;
         }
 
@@ -437,9 +433,7 @@
 
         .worker-selection {
             max-height: 267px;
-            /* tinggi tetap */
             overflow-y: auto;
-            /* scroll jika melebihi tinggi */
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             padding: 12px;
@@ -547,13 +541,9 @@
             overflow-wrap: break-word;
             white-space: normal;
             display: block;
-            /* pastikan block */
             width: 100%;
-            /* ambil full lebar container */
             max-width: 100%;
-            /* jangan melebar melebihi container */
             overflow-wrap: anywhere;
-            /* memaksa kata panjang untuk wrap */
             text-align: justify;
         }
 
@@ -614,7 +604,6 @@
                 </div>
             </div>
             <div class="action-buttons" id="actionButtons">
-                <!-- Buttons will be added dynamically -->
             </div>
         </div>
 
@@ -623,7 +612,6 @@
                 <div class="project-card">
                     <h3 class="card-title">Informasi Proyek</h3>
                     <div class="info-grid" id="projectInfo">
-                        <!-- Info will be loaded dynamically -->
                     </div>
 
                     <div class="info-item">
@@ -639,15 +627,11 @@
                         Daftar Pekerja (<span id="workerCount">0</span>)
                     </h3>
 
-                    <!-- 🔍 SEARCH BAR (STATIS) -->
                     <input type="text" id="pekerjaSearch" placeholder="Cari nama pekerja..."
                         oninput="filterPekerjaDetail()" style="margin-bottom: 12px;">
 
-                    <!-- 🧱 FRAME STATIS -->
                     <div class="pekerja-frame">
-                        <!-- 🔽 ISI SCROLL -->
                         <div class="pekerja-list" id="pekerjaList">
-                            <!-- Workers -->
                         </div>
                     </div>
                 </div>
@@ -655,7 +639,6 @@
         </div>
     </div>
 
-    <!-- Modal Edit -->
     <div class="modal" id="editModal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeEditModal()">×</button>
@@ -693,7 +676,6 @@
                 <div class="form-group">
                     <label>Pilih Pekerja</label>
 
-                    <!-- 🔝 BARIS ATAS: search + tim + tambah -->
                     <div class="worker-top-bar">
                         <input type="text" id="workerSearch" placeholder="Cari pekerja..."
                             oninput="filterWorkers()">
@@ -708,7 +690,6 @@
                         </button>
                     </div>
 
-                    <!-- 🔽 LIST PEKERJA -->
                     <div class="worker-selection" id="editWorkerSelection"></div>
 
                     <div id="workerCountText" style="margin-top:8px;font-size:13px;color:#666;">
@@ -785,7 +766,6 @@
             }
 
             try {
-                // Cari admin berdasarkan email login
                 const q = query(
                     collection(db, "admin"),
                     where("email", "==", user.email)
@@ -793,15 +773,12 @@
 
                 const snap = await getDocs(q);
 
-                // Ambil 1 data admin (harusnya cuma 1)
                 const adminDoc = snap.docs[0];
                 const adminData = adminDoc.data();
 
-                // 🔥 Update profil kiri bawah
                 document.querySelector('.user-name').textContent = adminData.nama;
                 document.querySelector('.user-email').textContent = adminData.email;
 
-                // Avatar: gambar base64 ATAU inisial
                 const avatarEl = document.querySelector('.user-avatar');
 
                 if (adminData.avatar && adminData.avatar.startsWith("data:image")) {
@@ -910,7 +887,6 @@
             if (projectData.pekerja && projectData.pekerja.length > 0) {
                 const pekerjaRefs = projectData.pekerja;
 
-                /* 🔥 ambil data lengkap pekerja */
                 const pekerjaLengkap = [];
 
                 for (const p of pekerjaRefs) {
@@ -925,12 +901,10 @@
                     }
                 }
 
-                /* 🔥 SORT A–Z */
                 pekerjaLengkap.sort((a, b) =>
                     a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' })
                 );
 
-                /* 🔥 BUILD HTML */
                 let pekerjaHTML = '';
                 pekerjaLengkap.forEach(pekerja => {
                     const initials = pekerja.nama
@@ -999,7 +973,6 @@
             closeConfirmModal();
         });
 
-        // expose ke global
         window.openConfirmModal = openConfirmModal;
         window.closeConfirmModal = closeConfirmModal;
 
@@ -1063,23 +1036,19 @@
             const supervisorsSnap = await getDocs(collection(db, "supervisors"));
             let supervisorDocIdToSet = null;
 
-            // LOAD SEMUA SUPERVISOR KE DROPDOWN & CARI MATCH BERDASARKAN UID
             supervisorsSnap.forEach((s) => {
                 const option = document.createElement("option");
-                option.value = s.id; // value pakai doc ID
+                option.value = s.id;
                 option.textContent = s.data().nama;
                 supervisorSelect.appendChild(option);
 
-                // Cek UID - match dengan projectData.supervisor (bisa string atau object)
                 const supervisorUid = s.data().uid;
                 const projectSupervisorValue = projectData.supervisor;
 
-                // Jika projectData.supervisor adalah string UID
                 if (typeof projectSupervisorValue === 'string' && projectSupervisorValue === supervisorUid) {
                     supervisorDocIdToSet = s.id;
                     console.log('Match: UID string, set doc ID ke:', s.id);
                 }
-                // Jika projectData.supervisor adalah object dengan property uid atau id
                 else if (typeof projectSupervisorValue === 'object' && projectSupervisorValue !== null) {
                     if (projectSupervisorValue.uid === supervisorUid || projectSupervisorValue.id === supervisorUid) {
                         supervisorDocIdToSet = s.id;
@@ -1088,7 +1057,6 @@
                 }
             });
 
-            // SET DROPDOWN VALUE
             if (supervisorDocIdToSet) {
                 supervisorSelect.value = supervisorDocIdToSet;
                 console.log('Dropdown supervisor berhasil diset');
@@ -1108,7 +1076,6 @@
 
             const workersSnap = await getDocs(collection(db, "pekerja"));
 
-            /* 🔥 1. MASUKKAN KE ARRAY */
             const workers = [];
             workersSnap.forEach(w => {
                 workers.push({
@@ -1117,12 +1084,10 @@
                 });
             });
 
-            /* 🔥 2. SORT A–Z */
             workers.sort((a, b) =>
                 a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' })
             );
 
-            /* 🔥 3. BARU RENDER */
             workers.forEach(w => {
                 const checked = selectedWorkers.includes(w.id) ? 'checked' : '';
 
@@ -1180,13 +1145,11 @@
             workers.forEach(worker => {
                 const nama = worker.getAttribute('data-nama');
 
-                // jika search kosong → tampilkan semua
                 if (keyword === '') {
                     worker.style.display = 'flex';
                     return;
                 }
 
-                // jika cocok & belum lebih dari 5
                 if (nama.includes(keyword) && shown < 5) {
                     worker.style.display = 'flex';
                     shown++;
@@ -1211,7 +1174,6 @@
             const pekerjaTim = teamDoc.data().pekerja || [];
 
             pekerjaTim.forEach(member => {
-                // 🔥 NORMALISASI ID
                 const workerId =
                     typeof member === 'string'
                         ? member
@@ -1262,7 +1224,6 @@
 
             alert('Proyek berhasil diperbarui');
             closeEditModal();
-            // Reset search dan reload
             document.getElementById('pekerjaSearch').value = '';
             loadProject();
         });
