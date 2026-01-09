@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Mingguan - CV. LINGGA</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            display: flex;
+            background: #f5f5f5;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .logo {
+            padding: 24px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4361ee;
+            letter-spacing: 1px;
+        }
+
+        .menu {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: #f8f9fa;
+            border-left-color: #4361ee;
+            color: #4361ee;
+        }
+
+        .menu-item.active {
+            background: #f0f4ff;
+            border-left-color: #4361ee;
+            color: #4361ee;
+            font-weight: 600;
+        }
+
+        .menu-item-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+        }
+
+        .user-profile {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #c3c3c3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-email {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: white;
+            color: #666;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: #f8f9fa;
+        }
+
+        .header-title h2 {
+            font-size: 32px;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-download {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #059669;
+        }
+
+        .week-nav-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nav:hover {
+            background: #e9ecef;
+            border-color: #4361ee;
+        }
+
+        .btn-current {
+            padding: 8px 16px;
+            background: #4361ee;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-current:hover {
+            background: #3651d4;
+        }
+
+        .week-display {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+            color: #1a1a1a;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        th.center {
+            text-align: center;
+        }
+
+        .day-header {
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .day-name {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .day-date {
+            display: block;
+            font-size: 11px;
+            color: #666;
+            font-weight: 400;
+            text-transform: none;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        td {
+            padding: 16px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        td.center {
+            text-align: center;
+        }
+
+        .worker-name {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .status-hadir {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-izin {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-sakit {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-alpha {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-libur {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .status-telat {
+            position: relative;
+            cursor: help;
+        }
+
+        .status-telat::after {
+            content: attr(data-telat);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            margin-bottom: 8px;
+            z-index: 10;
+        }
+
+        .status-telat::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #1a1a1a;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            margin-bottom: 2px;
+        }
+
+        .status-telat:hover::after,
+        .status-telat:hover::before {
+            opacity: 1;
+        }
+
+        .percentage {
+            font-size: 16px;
+            font-weight: 700;
+            color: #4361ee;
+        }
+
+        .keterangan-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .keterangan-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .keterangan-item {
+            display: flex;
+            align-items: start;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+            padding: 8px 0;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #4361ee;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>CV. LINGGA</h1>
+        </div>
+
+        <div class="menu">
+            <a class="menu-item active" href="proyek_aktif.html">
+                <i data-feather="briefcase" class="menu-item-icon"></i>
+                <span>Proyek Aktif</span>
+            </a>
+
+            <a class="menu-item" href="proyek_selesai.html">
+                <i data-feather="check-square" class="menu-item-icon"></i>
+                <span>Proyek Selesai</span>
+            </a>
+
+            <a class="menu-item" href="supervisor_lapangan.html">
+                <i data-feather="users" class="menu-item-icon"></i>
+                <span>Supervisor</span>
+            </a>
+
+            <a class="menu-item" href="pekerja.html">
+                <i data-feather="tool" class="menu-item-icon"></i>
+                <span>Pekerja</span>
+            </a>
+        </div>
+
+        <div class="user-profile" onclick="window.location.href='profil.html'">
+            <div class="user-avatar"></div>
+            <div class="user-info">
+                <div class="user-name">Loading...</div>
+                <div class="user-email">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="content-header">
+            <div class="header-left">
+                <button class="btn-back" onclick="goBackToDetail()">
+                    <i data-feather="arrow-left"></i>
+                    Kembali
+                </button>
+                <div class="header-title">
+                    <h2>Rekap Mingguan Absensi</h2>
+                    <p class="header-subtitle" id="periodText">Loading...</p>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn-action btn-download" onclick="downloadExcel()">
+                    <i data-feather="download"></i>
+                    Download Excel
+                </button>
+            </div>
+        </div>
+
+        <div class="week-nav-card">
+            <button class="btn-nav" onclick="previousWeek()">
+                <i data-feather="chevron-left"></i>
+            </button>
+            <button class="btn-current" onclick="currentWeek()">
+                Minggu Ini
+            </button>
+            <div class="week-display" id="weekDisplay">Loading...</div>
+            <button class="btn-nav" onclick="nextWeek()">
+                <i data-feather="chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="table-card">
+            <div class="table-wrapper">
+                <table id="rekapTable">
+                    <thead id="tableHead">
+                        <tr>
+                            <th>Nama Pekerja</th>
+                            <th class="center">Loading...</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="10" class="loading">
+                                <div class="spinner"></div>
+                                <p>Memuat data...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="keterangan-card">
+            <h3 class="card-title">Keterangan</h3>
+            <div class="keterangan-list" id="keteranganList">
+                <div class="keterangan-item">
+                    <span>•</span>
+                    <span>Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZWXurY0DGfIWxeKTRvWv6aPohsGIG9OE",
+            authDomain: "project-kp-fd649.firebaseapp.com",
+            projectId: "project-kp-fd649"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        feather.replace();
+
+        const params = new URLSearchParams(window.location.search);
+        const projectId = params.get("projectId");
+
+        let rekapData = [];
+        let pekerjaSet = new Set();
+        let tanggalList = [];
+        let keteranganIzin = [];
+        let currentWeekStart = new Date();
+
+        let minWeekStart;
+        let maxWeekStart;
+
+        function formatDate(d) {
+            // Format tanggal ke YYYY-MM-DD menggunakan timezone lokal (bukan UTC)
+            const date = new Date(d);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDateDisplay(d) {
+            const date = new Date(d);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function getHariIndonesia(date) {
+            return ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][date.getDay()];
+        }
+
+        function getMonday(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const q = query(collection(db, "admin"), where("email", "==", user.email));
+                const snap = await getDocs(q);
+
+                if (!snap.empty) {
+                    const adminData = snap.docs[0].data();
+                    document.querySelector('.user-name').textContent = adminData.nama;
+                    document.querySelector('.user-email').textContent = adminData.email;
+
+                    const avatarEl = document.querySelector('.user-avatar');
+                    if (adminData.avatar && adminData.avatar.startsWith("data:image")) {
+                        avatarEl.innerHTML = `<img src="${adminData.avatar}">`;
+                    } else {
+                        avatarEl.textContent = adminData.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                    }
+                }
+
+                await loadRekap();
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        async function loadRekap() {
+            const today = new Date();
+
+            const proyekSnap = await getDocs(query(
+                collection(db, "projects"),
+                where("__name__", "==", projectId)
+            ));
+            const proyek = proyekSnap.docs[0].data();
+
+            // ⬅️ batas kiri: minggu mulai proyek
+            let tanggalMulai;
+
+            // fallback aman
+            if (proyek.tanggalMulai) {
+                tanggalMulai = new Date(proyek.tanggalMulai);
+            } else {
+                // fallback paling aman: 1 Januari tahun ini
+                tanggalMulai = new Date(new Date().getFullYear(), 0, 1);
+            }
+
+            minWeekStart = normalizeDate(getMonday(tanggalMulai));
+            maxWeekStart = normalizeDate(getMonday(today));
+            currentWeekStart = normalizeDate(new Date(maxWeekStart));
+
+            await fetchAndRenderData();
+        }
+
+        function normalizeDate(d) {
+            const x = new Date(d);
+            x.setHours(0, 0, 0, 0);
+            return x;
+        }
+
+        function updateNavButtons() {
+            const prevBtn = document.querySelector('.btn-nav[onclick="previousWeek()"]');
+            const nextBtn = document.querySelector('.btn-nav[onclick="nextWeek()"]');
+
+            prevBtn.disabled = currentWeekStart.getTime() === minWeekStart.getTime();
+            nextBtn.disabled = currentWeekStart.getTime() >= maxWeekStart.getTime();
+
+            prevBtn.style.opacity = prevBtn.disabled ? 0.4 : 1;
+            nextBtn.style.opacity = nextBtn.disabled ? 0.4 : 1;
+            prevBtn.style.cursor = prevBtn.disabled ? 'not-allowed' : 'pointer';
+            nextBtn.style.cursor = nextBtn.disabled ? 'not-allowed' : 'pointer';
+        }
+
+        async function fetchAndRenderData() {
+            // Reset data
+            rekapData = [];
+            pekerjaSet = new Set();
+            keteranganIzin = [];
+
+            const startDate = new Date(currentWeekStart);
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6);
+
+            // Build tanggal list
+            tanggalList = [];
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                tanggalList.push(new Date(d));
+            }
+
+            // Update display
+            document.getElementById('periodText').textContent = `Periode: ${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}`;
+            document.getElementById('weekDisplay').textContent = `${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}`;
+
+            // Fetch data absensi
+            const q = query(
+                collection(db, "absensi"),
+                where("proyekId", "==", projectId)
+            );
+
+            const snap = await getDocs(q);
+
+            snap.forEach(doc => {
+                const data = doc.data();
+                const tglStr = data.tanggal;
+                const startStr = formatDate(startDate);
+                const endStr = formatDate(endDate);
+
+                if (tglStr >= startStr && tglStr <= endStr) {
+                    rekapData.push(data);
+
+                    data.dataPekerja.forEach(p => {
+                        pekerjaSet.add(p.nama);
+
+                        if (p.status === "izin" && p.keterangan) {
+                            keteranganIzin.push(
+                                `${data.tanggal}: ${p.nama} - ${p.keterangan}`
+                            );
+                        }
+                    });
+                }
+            });
+
+            renderTable();
+            updateNavButtons();
+            feather.replace();
+        }
+
+        function renderTable() {
+            const table = document.getElementById("rekapTable");
+            const tableHead = document.getElementById("tableHead");
+            const tableBody = document.getElementById("tableBody");
+
+            // Render header
+            let headerHTML = '<tr><th>Nama Pekerja</th>';
+            tanggalList.forEach(d => {
+                headerHTML += `<th class="day-header center">
+                    <span class="day-name">${getHariIndonesia(d)}</span>
+                    <span class="day-date">${formatDateDisplay(d)}</span>
+                </th>`;
+            });
+            headerHTML += '<th class="center">Persentase Kehadiran</th></tr>';
+            tableHead.innerHTML = headerHTML;
+
+            // Render body
+            let bodyHTML = '';
+            pekerjaSet.forEach(nama => {
+                let hadirCount = 0;
+                let hariAktif = 0;
+                bodyHTML += `<tr><td class="worker-name">${nama}</td>`;
+
+                tanggalList.forEach(d => {
+                    const tanggal = formatDate(d);
+                    let status = "-";
+                    let statusClass = "status-libur";
+                    let telatMenit = 0;
+
+                    let adaDataHariIni = false;
+
+                    rekapData.forEach(r => {
+                        if (r.tanggal === tanggal) {
+                            const p = r.dataPekerja.find(x => x.nama === nama);
+                            if (p) {
+                                adaDataHariIni = true;
+
+                                if (p.status === "hadir") {
+                                    status = "H";
+                                    statusClass = "status-hadir";
+                                    hadirCount++;
+                                    telatMenit = p.telatMenit || 0;
+                                    if (telatMenit > 0) {
+                                        status = `H*`;
+                                        statusClass = "status-hadir status-telat";
+                                    }
+                                } else if (p.status === "izin") {
+                                    status = "I";
+                                    statusClass = "status-izin";
+                                } else {
+                                    status = "A";
+                                    statusClass = "status-alpha";
+                                }
+                            }
+                        }
+                    });
+
+                    if (adaDataHariIni) {
+                        hariAktif++;
+                    }
+
+                    if (telatMenit > 0) {
+                        bodyHTML += `<td class="center"><span class="status-badge ${statusClass}" data-telat="Telat ${telatMenit} menit">${status}</span></td>`;
+                    } else {
+                        bodyHTML += `<td class="center"><span class="status-badge ${statusClass}">${status}</span></td>`;
+                    }
+                });
+
+                const persen = hariAktif > 0
+                    ? ((hadirCount / hariAktif) * 100).toFixed(1)
+                    : 0;
+                bodyHTML += `<td class="center"><span class="percentage">${persen}%</span></td></tr>`;
+            });
+
+            tableBody.innerHTML = bodyHTML || '<tr><td colspan="10" style="text-align: center; padding: 40px; color: #999;">Tidak ada data</td></tr>';
+
+            // Render keterangan - diurutkan berdasarkan tanggal
+            const ketEl = document.getElementById("keteranganList");
+            if (keteranganIzin.length > 0) {
+                // Sort keterangan berdasarkan tanggal (format: YYYY-MM-DD di awal string)
+                const sortedKeterangan = keteranganIzin.sort((a, b) => {
+                    const dateA = a.substring(0, 10); // ambil YYYY-MM-DD
+                    const dateB = b.substring(0, 10);
+                    return dateA.localeCompare(dateB);
+                });
+
+                ketEl.innerHTML = sortedKeterangan.map(k => `
+                    <div class="keterangan-item">
+                        <span>•</span>
+                        <span>${k}</span>
+                    </div>
+                `).join('');
+            } else {
+                ketEl.innerHTML = `
+                    <div class="keterangan-item">
+                        <span>•</span>
+                        <span>Tidak ada keterangan</span>
+                    </div>
+                `;
+            }
+        }
+
+        window.previousWeek = function () {
+            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+            fetchAndRenderData();
+        };
+
+        window.nextWeek = function () {
+            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+            fetchAndRenderData();
+        };
+
+        window.currentWeek = function () {
+            currentWeekStart = new Date(maxWeekStart);
+            fetchAndRenderData();
+        };
+
+        window.downloadExcel = function () {
+            const wb = XLSX.utils.book_new();
+            const wsData = [];
+
+            // Header
+            const startDate = new Date(currentWeekStart);
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6);
+            
+            wsData.push([`Periode: ${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}`]);
+            wsData.push([]);
+
+            // Header hari
+            wsData.push([
+                "Hari",
+                ...tanggalList.map(d => getHariIndonesia(d)),
+                "Persentase Kehadiran"
+            ]);
+
+            // Header tanggal
+            wsData.push([
+                "Tanggal",
+                ...tanggalList.map(d => formatDate(d)),
+                ""
+            ]);
+
+            wsData.push(["Nama Pekerja"]);
+
+            // Data pekerja
+            pekerjaSet.forEach(nama => {
+                let hadir = 0;
+                let hariAktif = 0;
+                const row = [nama];
+
+                tanggalList.forEach(d => {
+                    const tgl = formatDate(d);
+                    let status = "-";
+
+                    let adaDataHariIni = false;
+
+                    rekapData.forEach(r => {
+                        if (r.tanggal === tgl) {
+                            const p = r.dataPekerja.find(x => x.nama === nama);
+                            if (p) {
+                                adaDataHariIni = true;
+
+                                if (p.status === "hadir") {
+                                    status = "H";
+                                    hadir++;
+                                    if ((p.telatMenit || 0) > 0) {
+                                        status = `H (telat ${p.telatMenit} menit)`;
+                                    }
+                                } else if (p.status === "izin") {
+                                    status = "I";
+                                } else if (p.status === "sakit") {
+                                    status = "S";
+                                } else {
+                                    status = "A";
+                                }
+                            }
+                        }
+                    });
+
+                    if (adaDataHariIni) {
+                        hariAktif++;
+                    }
+
+                    row.push(status);
+                });
+
+                row.push(hariAktif > 0 ? hadir / hariAktif : 0);
+                wsData.push(row);
+            });
+
+            // Keterangan
+            wsData.push([]);
+            wsData.push(["Keterangan:"]);
+            keteranganIzin.forEach(k => {
+                wsData.push([k]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            // Format persentase
+            const persenCol = tanggalList.length + 1;
+            for (let r = 5; r < 5 + pekerjaSet.size; r++) {
+                const cellRef = XLSX.utils.encode_cell({ r, c: persenCol });
+                if (ws[cellRef]) {
+                    ws[cellRef].t = "n";
+                    ws[cellRef].z = "0.0%";
+                }
+            }
+
+            ws["!cols"] = wsData[0].map((_, i) => ({
+                wch: Math.max(...wsData.map(r => (r[i] ? r[i].toString().length : 10)), 12)
+            }));
+
+            XLSX.utils.book_append_sheet(wb, ws, "Rekap Mingguan");
+
+            const now = new Date();
+            const filename = `rekap_mingguan_${formatDate(now)}.xlsx`;
+            XLSX.writeFile(wb, filename);
+        };
+
+        window.goBackToDetail = function () {
+            window.location.href = `detail_proyek.html?id=${projectId}`;
+        };
+    </script>
+</body>
+
+</html>

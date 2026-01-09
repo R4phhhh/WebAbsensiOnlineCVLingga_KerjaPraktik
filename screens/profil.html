@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - CV. LINGGA</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            display: flex;
+            background: #f5f5f5;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .logo {
+            padding: 24px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4361ee;
+            letter-spacing: 1px;
+        }
+
+        .menu {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: #f8f9fa;
+            border-left-color: #4361ee;
+            color: #4361ee;
+        }
+
+        .menu-item.active {
+            background: #f0f4ff;
+            border-left-color: #4361ee;
+            color: #4361ee;
+            font-weight: 600;
+        }
+
+        .menu-item-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+        }
+
+        .user-profile {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-profile.active {
+            background: #f0f4ff;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #c3c3c3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            object-fit: cover;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .user-email {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            margin-bottom: 30px;
+        }
+
+        .content-header h2 {
+            font-size: 32px;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .content-header p {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .profile-container {
+            max-width: 800px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 24px;
+        }
+
+        .profile-avatar-container {
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #c3c3c3 0%, #dddddd 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 36px;
+            object-fit: cover;
+        }
+
+        .edit-avatar-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #8d8d8d;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .edit-avatar-btn:hover {
+            background: #727272;
+        }
+
+        .edit-avatar-btn i {
+            width: 16px;
+            height: 16px;
+            color: white;
+        }
+
+        .profile-header-info {
+            flex: 1;
+        }
+
+        .profile-header-info h3 {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .profile-role {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #f0f4ff;
+            color: #4361ee;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-edit-profile {
+            padding: 10px 20px;
+            background: #4361ee;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .profile-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .info-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-value i {
+            width: 18px;
+            height: 18px;
+            color: #666;
+        }
+
+        .btn-logout {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 24px;
+        }
+
+        .btn-logout:hover {
+            background: #dc2626;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            margin-bottom: 24px;
+        }
+
+        .modal-header h3 {
+            font-size: 24px;
+            color: #1a1a1a;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4361ee;
+        }
+
+        .avatar-upload {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #c3c3c3 0%, #dddddd 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 28px;
+            object-fit: cover;
+        }
+
+        .upload-area {
+            flex: 1;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .btn-upload {
+            padding: 10px 20px;
+            background: #f0f4ff;
+            color: #4361ee;
+            border: 1px solid #4361ee;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .file-name {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            background: white;
+            color: #666;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            flex: 2;
+            padding: 12px;
+            background: #4361ee;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .profile-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>CV. LINGGA</h1>
+        </div>
+
+        <div class="menu">
+            <a class="menu-item" href="proyek_aktif.html">
+                <i data-feather="briefcase" class="menu-item-icon"></i>
+                <span>Proyek Aktif</span>
+            </a>
+
+            <a class="menu-item" href="proyek_selesai.html">
+                <i data-feather="check-square" class="menu-item-icon"></i>
+                <span>Proyek Selesai</span>
+            </a>
+
+            <a class="menu-item" href="supervisor_lapangan.html">
+                <i data-feather="users" class="menu-item-icon"></i>
+                <span>Supervisor</span>
+            </a>
+
+            <a class="menu-item" href="pekerja.html">
+                <i data-feather="tool" class="menu-item-icon"></i>
+                <span>Pekerja</span>
+            </a>
+        </div>
+
+        <div class="user-profile active">
+            <img class="user-avatar" id="sidebarAvatar" style="display: none;">
+            <div class="user-avatar" id="sidebarInitials"></div>
+            <div class="user-info">
+                <div class="user-name">Loading...</div>
+                <div class="user-email">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="content-header">
+            <h2>Profil Saya</h2>
+            <p>Informasi akun Anda</p>
+        </div>
+
+        <div class="profile-container">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar-container">
+                        <img class="profile-avatar" id="profileAvatarImg" style="display: none;">
+                        <div class="profile-avatar" id="profileAvatarInitials"></div>
+                        <div class="edit-avatar-btn" onclick="openEditModal()">
+                            <i data-feather="edit-2"></i>
+                        </div>
+                    </div>
+                    <div class="profile-header-info">
+                        <h3 id="profileName">Loading...</h3>
+                        <span class="profile-role">Admin</span>
+                    </div>
+                    <button class="btn-edit-profile" onclick="openEditModal()">
+                        <i data-feather="edit"></i>
+                        Edit Profil
+                    </button>
+                </div>
+
+                <div class="profile-info">
+                    <div class="info-group">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">
+                            <i data-feather="mail"></i>
+                            <span id="profileEmail">Loading...</span>
+                        </div>
+                    </div>
+
+                    <div class="info-group">
+                        <div class="info-label">No. Telepon</div>
+                        <div class="info-value">
+                            <i data-feather="phone"></i>
+                            <span id="profilePhone">Loading...</span>
+                        </div>
+                    </div>
+
+                    <div class="info-group" style="grid-column: 1 / -1;">
+                        <div class="info-label">Alamat</div>
+                        <div class="info-value">
+                            <i data-feather="map-pin"></i>
+                            <span id="profileAddress">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-logout" onclick="openLogoutModal()">
+                    <i data-feather="log-out"></i>
+                    Keluar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Profil</h3>
+            </div>
+            <form id="editForm">
+                <div class="form-group">
+                    <label>Foto Profil</label>
+                    <div class="avatar-upload">
+                        <img class="avatar-preview" id="avatarPreviewImg" style="display: none;">
+                        <div class="avatar-preview" id="avatarPreviewInitials">WS</div>
+                        <div class="upload-area">
+                            <div class="file-input-wrapper">
+                                <button type="button" class="btn-upload">
+                                    <i data-feather="upload"></i>
+                                    Pilih Gambar
+                                </button>
+                                <input type="file" id="avatarFile" accept="image/*" onchange="previewAvatar(event)">
+                            </div>
+                            <div class="file-name" id="fileName">Belum ada file dipilih</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nama</label>
+                    <input type="text" id="editNama" required>
+                </div>
+
+                <div class="form-group">
+                    <label>No. HP</label>
+                    <input type="tel" id="editNohp">
+                </div>
+
+                <div class="form-group">
+                    <label>Alamat</label>
+                    <input type="text" id="editAlamat">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEditModal()">Batal</button>
+                    <button type="submit" class="btn-submit">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="logoutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Keluar Akun</h3>
+            </div>
+            <p style="color:#555; line-height:1.6">
+                Apakah Anda yakin ingin keluar dari akun ini?
+            </p>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeLogoutModal()">Batal</button>
+                <button class="btn-submit" style="background:#ef4444" onclick="confirmLogout()">
+                    Ya, Keluar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZWXurY0DGfIWxeKTRvWv6aPohsGIG9OE",
+            authDomain: "project-kp-fd649.firebaseapp.com",
+            projectId: "project-kp-fd649"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        feather.replace();
+
+        let currentUser = null;
+        let selectedFile = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const adminCol = collection(db, "admin");
+            const q = query(adminCol, where("email", "==", user.email));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                await signOut(auth);
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const adminDoc = querySnapshot.docs[0];
+            currentUser = { id: adminDoc.id, ...adminDoc.data() };
+            displayProfile();
+        });
+
+        function displayProfile() {
+            document.getElementById('profileName').textContent = currentUser.nama;
+            document.getElementById('profileEmail').textContent = currentUser.email;
+            document.getElementById('profilePhone').textContent = currentUser.nohp || '-';
+            document.getElementById('profileAddress').textContent = currentUser.alamat || '-';
+
+            // Display avatar
+            if (currentUser.avatar && currentUser.avatar.startsWith('data:image')) {
+                document.getElementById('profileAvatarImg').src = currentUser.avatar;
+                document.getElementById('profileAvatarImg').style.display = 'block';
+                document.getElementById('profileAvatarInitials').style.display = 'none';
+
+                document.getElementById('sidebarAvatar').src = currentUser.avatar;
+                document.getElementById('sidebarAvatar').style.display = 'block';
+                document.getElementById('sidebarInitials').style.display = 'none';
+            } else {
+                const initials = currentUser.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                document.getElementById('profileAvatarInitials').textContent = initials;
+                document.getElementById('sidebarInitials').textContent = initials;
+            }
+
+            document.querySelector('.user-name').textContent = currentUser.nama;
+            document.querySelector('.user-email').textContent = currentUser.email;
+
+            feather.replace();
+        }
+
+        function openEditModal() {
+            document.getElementById('editNama').value = currentUser.nama;
+            document.getElementById('editNohp').value = currentUser.nohp || '';
+            document.getElementById('editAlamat').value = currentUser.alamat || '';
+
+            // Display current avatar
+            if (currentUser.avatar && currentUser.avatar.startsWith('data:image')) {
+                document.getElementById('avatarPreviewImg').src = currentUser.avatar;
+                document.getElementById('avatarPreviewImg').style.display = 'block';
+                document.getElementById('avatarPreviewInitials').style.display = 'none';
+            } else {
+                const initials = currentUser.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                document.getElementById('avatarPreviewInitials').textContent = initials;
+            }
+
+            document.getElementById('editModal').classList.add('show');
+            feather.replace();
+        }
+
+        window.openEditModal = openEditModal;
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+            document.getElementById('avatarFile').value = '';
+            document.getElementById('fileName').textContent = 'Belum ada file dipilih';
+            selectedFile = null;
+        }
+
+        window.closeEditModal = closeEditModal;
+
+        function previewAvatar(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('fileName').textContent = file.name;
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    selectedFile = e.target.result;
+                    document.getElementById('avatarPreviewImg').src = selectedFile;
+                    document.getElementById('avatarPreviewImg').style.display = 'block';
+                    document.getElementById('avatarPreviewInitials').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        window.previewAvatar = previewAvatar;
+
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nama = document.getElementById('editNama').value;
+            const nohp = document.getElementById('editNohp').value;
+            const alamat = document.getElementById('editAlamat').value;
+
+            try {
+                const updateData = {
+                    nama,
+                    nohp,
+                    alamat
+                };
+
+                if (selectedFile) {
+                    updateData.avatar = selectedFile;
+                }
+
+                await updateDoc(doc(db, "admin", currentUser.id), updateData);
+
+                currentUser = { ...currentUser, ...updateData };
+                displayProfile();
+                closeEditModal();
+                alert('Profil berhasil diperbarui');
+            } catch (err) {
+                alert('Gagal memperbarui profil: ' + err.message);
+            }
+        });
+
+        function openLogoutModal() {
+            document.getElementById('logoutModal').classList.add('show');
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('show');
+        }
+
+        async function confirmLogout() {
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch (err) {
+                alert('Gagal logout: ' + err.message);
+            }
+        }
+
+        window.openLogoutModal = openLogoutModal;
+        window.closeLogoutModal = closeLogoutModal;
+        window.confirmLogout = confirmLogout;
+    </script>
+</body>
+
+</html>

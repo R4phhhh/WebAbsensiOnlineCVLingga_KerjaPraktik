@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV. LINGGA - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+    </style>
+</head>
+
+<body>
+    <div class="left-section">
+        <h1>CV. LINGGA</h1>
+    </div>
+
+    <div class="right-section">
+        <div class="content">
+            <h2>Selamat datang!</h2>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="E-mail..."><br>
+
+            <div id="passwordWrapper">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Password..."><br>
+            </div>
+            <div id="forgotWrapper" style="text-align: right; margin-top: 6px;">
+                <span id="forgotPassword" style="font-size: 13px; color: #4361ee; cursor: pointer;">
+                    Lupa password?
+                </span>
+            </div>
+            <button id="loginBtn">Log In</button>
+            <button id="backToLoginBtn">Kembali ke Login</button>
+            <div id="registerWrapper" style="text-align: center; margin-top: 14px;">
+                <span style="font-size: 14px; color: #555;">
+                    Belum punya akun?
+                    <span id="goRegister"
+                        style="color: #4361ee; cursor: pointer; font-weight: 500;">
+                        Daftar disini!
+                    </span>
+                </span>
+            </div>
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import {
+            getAuth,
+            signInWithEmailAndPassword,
+            signOut,
+            sendPasswordResetEmail
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import {
+            getFirestore,
+            collection,
+            getDocs,
+            query,
+            where
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZWXurY0DGfIWxeKTRvWv6aPohsGIG9OE",
+            authDomain: "project-kp-fd649.firebaseapp.com",
+            projectId: "project-kp-fd649",
+            storageBucket: "project-kp-fd649.appspot.com",
+            messagingSenderId: "90304196213",
+            appId: "1:90304196213:web:79b9e3bf6e262123d4123c",
+            measurementId: "G-5Z3KJ0ZGMQ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Tambahkan timeout untuk firestore connection
+        const firestoreTimeout = setTimeout(() => {
+            console.warn("Firestore connection timeout - mungkin masalah koneksi internet atau rules");
+            // Lanjutkan dengan mode offline jika diperlukan
+        }, 10000);
+
+        const goRegister = document.getElementById("goRegister");
+
+        if (goRegister) {
+        goRegister.addEventListener("click", () => {
+            window.location.href = "register.html"; // ganti sesuai nama file daftar kamu
+        });
+        }
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginBtn = document.getElementById("loginBtn");
+            const emailInput = document.getElementById("email");
+            const passwordInput = document.getElementById("password");
+            const statusDiv = document.getElementById("status");
+
+            // Tambahkan event listener untuk Enter key
+            passwordInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    loginBtn.click();
+                }
+            });
+
+            const forgotPassword = document.getElementById("forgotPassword");
+
+            // state and related elements for "Lupa password" mode
+            let isForgotMode = false;
+            const forgotWrapper = document.getElementById("forgotWrapper");
+            const registerWrapper = document.getElementById("registerWrapper");
+            const passwordWrapper = document.getElementById("passwordWrapper");
+            const backBtn = document.getElementById("backToLoginBtn");
+
+            forgotPassword.addEventListener("click", () => {
+                isForgotMode = true;
+
+                passwordWrapper.style.display = "none";
+                forgotWrapper.style.display = "none";
+                registerWrapper.style.display = "none";
+
+                loginBtn.textContent = "Kirim Reset Password";
+                backBtn.style.display = "block";
+
+                // bersihin status
+                statusDiv.style.display = "none";
+                statusDiv.className = "";
+                statusDiv.innerText = "";
+            });
+
+            backBtn.addEventListener("click", () => {
+                isForgotMode = false;
+
+                passwordWrapper.style.display = "block";
+                forgotWrapper.style.display = "block";
+                registerWrapper.style.display = "block";
+
+                loginBtn.textContent = "Log In";
+                backBtn.style.display = "none";
+
+                passwordInput.value = "";
+
+                // HILANGKAN NOTIF
+                statusDiv.style.display = "none";
+                statusDiv.className = "";
+                statusDiv.innerText = "";
+            });
+
+            loginBtn.addEventListener("click", async () => {
+                const email = emailInput.value.trim();
+
+                if (!email) {
+                    showError("Email harus diisi");
+                    return;
+                }
+
+                // =============================
+                // MODE LUPA PASSWORD
+                // =============================
+                if (isForgotMode) {
+                    try {
+                        statusDiv.className = "";
+                        statusDiv.innerText = "Mengirim email reset password...";
+                        statusDiv.style.display = "block";
+
+                        // Cek email di Firestore admin
+                        const q = query(
+                            collection(db, "admin"),
+                            where("email", "==", email)
+                        );
+                        const snap = await getDocs(q);
+
+                        if (snap.empty) {
+                            showError("Email tidak terdaftar");
+                            return;
+                        }
+
+                        await sendPasswordResetEmail(auth, email, {
+                            url: window.location.origin + "/login.html",
+                            handleCodeInApp: false
+                        });
+
+                        statusDiv.className = "success";
+                        statusDiv.innerText =
+                            "Link reset password telah dikirim ke email Anda";
+
+                    } catch (err) {
+                        console.error(err);
+                        showError("Gagal mengirim reset password");
+                    }
+                    return;
+                }
+
+                // =============================
+                // MODE LOGIN NORMAL
+                // =============================
+                const password = passwordInput.value;
+
+                if (!password) {
+                    showError("Password harus diisi");
+                    return;
+                }
+
+                try {
+                    statusDiv.innerText = "Sedang login...";
+                    statusDiv.style.display = "block";
+
+                    const userCredential =
+                        await signInWithEmailAndPassword(auth, email, password);
+
+                    const user = userCredential.user;
+
+                    if (!user.emailVerified) {
+                        await signOut(auth);
+                        showError("Email belum diverifikasi");
+                        return;
+                    }
+
+                    // Cek admin
+                    const q = query(
+                        collection(db, "admin"),
+                        where("email", "==", user.email)
+                    );
+                    const snap = await getDocs(q);
+
+                    if (snap.empty) {
+                        await signOut(auth);
+                        showError("Anda tidak memiliki akses admin");
+                        return;
+                    }
+
+                    const adminData = snap.docs[0].data();
+
+                    sessionStorage.setItem("admin_email", adminData.email);
+                    sessionStorage.setItem("admin_nama", adminData.nama);
+                    sessionStorage.setItem("is_admin", "true");
+
+                    statusDiv.className = "success";
+                    statusDiv.innerText = `Login berhasil!`;
+
+                    setTimeout(() => {
+                        window.location.href = "proyek_aktif.html";
+                    }, 1200);
+
+                } catch (err) {
+                    handleAuthError(err);
+                }
+            });
+
+            // Fungsi helper untuk menampilkan error
+            function showError(message) {
+                statusDiv.className = "error";
+                statusDiv.innerText = message;
+                statusDiv.style.display = "block";
+
+                // Auto hide error setelah 5 detik
+                setTimeout(() => {
+                    statusDiv.style.display = "none";
+                }, 5000);
+            }
+
+            // Fungsi untuk handle berbagai jenis auth error
+            function handleAuthError(error) {
+                let errorMessage = "Login gagal: ";
+
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage += "Format email tidak valid";
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage += "Akun ini dinonaktifkan";
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage += "Email tidak terdaftar";
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage += "Password salah";
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage += "Koneksi internet bermasalah";
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage += "Terlalu banyak percobaan. Coba lagi nanti";
+                        break;
+                    default:
+                        errorMessage += error.message;
+                }
+
+                showError(errorMessage);
+            }
+
+            // auth.onAuthStateChanged((user) => {
+            //     if (user) {
+            //         console.log("Sudah login sebagai:", user.email);
+            //         window.location.href = "proyek_aktif.html";
+            //     }
+            // });
+
+            // Clear timeout saat komponen unmount
+            window.addEventListener('beforeunload', () => {
+                clearTimeout(firestoreTimeout);
+            });
+        });
+
+        // Export untuk testing jika diperlukan
+        window.auth = auth;
+        window.db = db;
+    </script>
+
+</body>
+
+</html>

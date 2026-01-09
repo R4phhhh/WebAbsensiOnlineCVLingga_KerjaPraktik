@@ -1,0 +1,75 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+}
+
+/* NAVBAR ATAS — harus paling depan */
+.navbar {
+    width: 100%;
+    background: #4A4AFF;
+    color: white;
+    padding: 15px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Bikin paling depan */
+}
+
+/* SIDEBAR KIRI */
+.sidebar {
+    width: 120px;
+    background: #202020;
+    height: 100vh;
+    padding-top: 70px; /* Supaya tidak tertutupi navbar */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 500; /* Lebih kecil dari navbar */
+}
+
+.sidebar button {
+    width: 100px;
+    padding: 10px;
+    background: #444;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.sidebar button:hover {
+    background: #666;
+}
+
+/* KONTEN LOGIN */
+.content {
+    margin-left: 140px;
+    margin-top: 80px;
+    padding: 20px;
+}
+
+input {
+    width: 250px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#loginBtn {
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.nav-title {
+    cursor: pointer;
+}
+
+.nav-title:hover {
+    text-decoration: underline;
+}

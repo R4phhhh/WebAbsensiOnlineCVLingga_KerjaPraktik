@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV. LINGGA - Register</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .left-section {
+            width: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            color: white;
+        }
+
+        .left-section h1 {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .right-section {
+            width: 50%;
+            background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .content h2 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            color: #1a1a1a;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            margin-top: 18px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #4361ee;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 26px;
+        }
+
+        button:hover {
+            background: #3451d1;
+        }
+
+        .login-link {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #4361ee;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        #status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        #status.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        #status.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .left-section, .right-section {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="left-section">
+    <h1>CV. LINGGA</h1>
+</div>
+
+<div class="right-section">
+    <div class="content">
+        <h2>Daftar Akun</h2>
+
+        <label>Email</label>
+        <input type="email" id="email" placeholder="E-mail">
+
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Password">
+
+        <label>Konfirmasi Password</label>
+        <input type="password" id="confirmPassword" placeholder="Ulangi Password">
+
+        <button id="registerBtn">Daftar</button>
+
+        <div class="login-link">
+            Sudah punya akun? <a href="login.html">Login disini!</a>
+        </div>
+
+        <div id="status"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        sendEmailVerification,
+        signOut
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    import {
+    getFirestore,
+    doc,
+    setDoc,
+    serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDZWXurY0DGfIWxeKTRvWv6aPohsGIG9OE",
+        authDomain: "project-kp-fd649.firebaseapp.com",
+        projectId: "project-kp-fd649",
+        storageBucket: "project-kp-fd649.appspot.com",
+        messagingSenderId: "90304196213",
+        appId: "1:90304196213:web:79b9e3bf6e262123d4123c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const registerBtn = document.getElementById("registerBtn");
+    const statusDiv = document.getElementById("status");
+
+    const db = getFirestore(app);
+    
+    registerBtn.addEventListener("click", async () => {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        if (!email || !password || !confirmPassword) {
+            showError("Semua kolom wajib diisi");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showError("Password dan konfirmasi tidak sama");
+            return;
+        }
+
+        try {
+            registerBtn.disabled = true;
+            registerBtn.textContent = "Mendaftar...";
+
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            await setDoc(doc(db, "admin", user.uid), {
+                email: user.email,
+                nama: "Admin",
+                alamat: "",
+                nohp: "",
+                avatar: "",
+                createdAt: serverTimestamp()
+            });
+
+            await sendEmailVerification(user);
+
+            statusDiv.className = "success";
+            statusDiv.innerText =
+                "Email verifikasi telah dikirim. Silakan cek email Anda.";
+
+            // logout dulu sampai verifikasi dilakukan
+            await signOut(auth);
+
+        } catch (error) {
+            let msg = "Gagal mendaftar: ";
+
+            switch (error.code) {
+                case "auth/email-already-in-use":
+                    msg += "Email sudah terdaftar";
+                    break;
+                case "auth/weak-password":
+                    msg += "Password minimal 6 karakter";
+                    break;
+                case "auth/invalid-email":
+                    msg += "Email tidak valid";
+                    break;
+                default:
+                    msg += error.message;
+            }
+
+            showError(msg);
+        } finally {
+            registerBtn.disabled = false;
+            registerBtn.textContent = "Daftar";
+        }
+    });
+
+    function showError(message) {
+        statusDiv.className = "error";
+        statusDiv.innerText = message;
+        statusDiv.style.display = "block";
+    }
+</script>
+
+</body>
+</html>

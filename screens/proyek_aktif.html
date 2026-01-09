@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyek Aktif - CV. LINGGA</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>CV. LINGGA</h1>
+        </div>
+
+        <div class="menu">
+            <a class="menu-item active" href="proyek_aktif.html">
+                <i data-feather="briefcase" class="menu-item-icon"></i>
+                <span>Proyek Aktif</span>
+            </a>
+
+            <a class="menu-item" href="proyek_selesai.html">
+                <i data-feather="check-square" class="menu-item-icon"></i>
+                <span>Proyek Selesai</span>
+            </a>
+
+            <a class="menu-item" href="supervisor_lapangan.html">
+                <i data-feather="users" class="menu-item-icon"></i>
+                <span>Supervisor</span>
+            </a>
+
+            <a class="menu-item" href="pekerja.html">
+                <i data-feather="tool" class="menu-item-icon"></i>
+                <span>Pekerja</span>
+            </a>
+        </div>
+
+        <div class="user-profile" onclick="window.location.href='profil.html'" id="userProfile">
+            <div class="user-avatar"></div>
+            <div class="user-info">
+                <div class="user-name">Loading...</div>
+                <div class="user-email">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="content-header">
+            <div class="header-text">
+                <h2>Proyek Aktif</h2>
+                <p>Kelola semua proyek yang sedang berjalan</p>
+            </div>
+            <button class="btn-tambah" onclick="openModal()">
+                <i data-feather="plus"></i>
+                <span>Tambah Proyek</span>
+            </button>
+        </div>
+
+        <div class="search-container">
+            <i data-feather="search" class="search-icon"></i>
+            <input type="text" class="search-input" id="searchInput" placeholder="Cari nama proyek..."
+                oninput="searchProjects()">
+        </div>
+
+        <div class="project-list" id="projectList">
+            <div class="empty-state">
+                <i data-feather="folder"></i>
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Proyek -->
+    <div class="modal" id="projectModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div class="modal-header">
+                <h3>Tambah Proyek Baru</h3>
+            </div>
+            <form id="projectForm">
+                <div class="form-group">
+                    <label for="namaProyek" class="required">Nama Proyek</label>
+                    <input type="text" id="namaProyek" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="namaClient" class="required">Nama Client</label>
+                    <input type="text" id="namaClient" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="tanggalMulai" class="required">Tanggal Mulai</label>
+                    <input type="date" id="tanggalMulai" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="tenggat" class="required">Tenggat Proyek</label>
+                    <input type="date" id="tenggat" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="supervisor" class="required">Supervisor</label>
+                    <select id="supervisor" required>
+                        <option value="">Pilih Supervisor</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Pilih Pekerja</label>
+
+                    <!-- BARIS ATAS: search + pilih tim -->
+                    <div class="worker-top-bar">
+                        <input type="text" id="workerSearch" placeholder="Cari pekerja..." oninput="filterWorkers()">
+
+                        <select id="teamSelect">
+                            <option value="">Pilih Tim</option>
+                        </select>
+
+                        <button type="button" class="btn-tambah btn-tim" onclick="addTeam()">
+                            Tambah Tim
+                        </button>
+                    </div>
+
+                    <!-- LIST PEKERJA -->
+                    <div class="worker-selection" id="workerSelection">
+                        <p style="color: #999; text-align: center;">Loading...</p>
+                    </div>
+
+                    <div id="workerCountText" style="margin-top:8px;font-size:13px;color:#666;">
+                        0 pekerja dipilih
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lokasi" class="required">Lokasi Proyek</label>
+                    <input type="text" id="lokasi" placeholder="Masukkan lokasi proyek" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="deskripsi">Deskripsi Proyek</label>
+                    <textarea id="deskripsi"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn-submit">Simpan Proyek</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZWXurY0DGfIWxeKTRvWv6aPohsGIG9OE",
+            authDomain: "project-kp-fd649.firebaseapp.com",
+            projectId: "project-kp-fd649"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        feather.replace();
+
+        let selectedWorkers = [];
+        let currentUser = null;
+        let allProjects = [];
+
+        import { query, where } from
+            "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const q = query(
+                    collection(db, "admin"),
+                    where("email", "==", user.email)
+                );
+
+                const snap = await getDocs(q);
+
+                const adminDoc = snap.docs[0];
+                const adminData = adminDoc.data();
+
+                document.querySelector('.user-name').textContent = adminData.nama;
+                document.querySelector('.user-email').textContent = adminData.email;
+
+                const avatarEl = document.querySelector('.user-avatar');
+
+                if (adminData.avatar && adminData.avatar.startsWith("data:image")) {
+                    avatarEl.innerHTML = `<img src="${adminData.avatar}">`;
+                } else {
+                    avatarEl.textContent = adminData.nama
+                        .split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .substring(0, 2)
+                        .toUpperCase();
+                }
+
+                loadProjects();
+
+            } catch (err) {
+                console.error(err);
+                alert("Gagal memuat data admin");
+            }
+        });
+
+        function openModal() {
+            document.getElementById('projectModal').classList.add('show');
+            loadFormData();
+            document.getElementById('workerCountText').textContent = '0 pekerja dipilih';
+        }
+
+        window.openModal = openModal;
+
+        function closeModal() {
+            document.getElementById('projectModal').classList.remove('show');
+            document.getElementById('projectForm').reset();
+            selectedWorkers = [];
+            document.getElementById('workerCountText').textContent = '0 pekerja dipilih';
+        }
+
+        window.closeModal = closeModal;
+
+    let allWorkers = [];
+
+        async function loadFormData() {
+            const supervisorSelect = document.getElementById('supervisor');
+            supervisorSelect.innerHTML = '<option value="">Pilih Supervisor</option>';
+
+            const supervisorsSnap = await getDocs(collection(db, "supervisors"));
+            supervisorsSnap.forEach((doc) => {
+                supervisorSelect.innerHTML += `
+                <option value="${doc.data().uid}">
+                    ${doc.data().nama}
+                </option>
+                `;
+            });
+
+            const teamSelect = document.getElementById('teamSelect');
+            teamSelect.innerHTML = '<option value="">Pilih Tim</option>';
+
+            const teamsSnap = await getDocs(collection(db, "tim_pekerja"));
+            teamsSnap.forEach((doc) => {
+                teamSelect.innerHTML += `<option value="${doc.id}">${doc.data().nama_tim}</option>`;
+            });
+
+            const workerSelection = document.getElementById('workerSelection');
+            workerSelection.innerHTML = '';
+            allWorkers = []; // reset
+
+            const workersSnap = await getDocs(collection(db, "pekerja"));
+            workersSnap.forEach((doc) => {
+                const worker = { id: doc.id, ...doc.data() };
+                allWorkers.push(worker);
+            });
+
+            allWorkers.sort((a, b) =>
+                a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' })
+            );
+
+            displayWorkers(allWorkers);
+        }
+
+        function displayWorkers(workers) {
+            const workerSelection = document.getElementById('workerSelection');
+            workerSelection.innerHTML = '';
+
+            if(workers.length === 0) {
+                workerSelection.innerHTML = `<p style="color: #999; text-align: center;">Pekerja tidak ditemukan</p>`;
+                return;
+            }
+
+            workers.forEach(worker => {
+                workerSelection.innerHTML += `
+                    <div class="worker-checkbox">
+                        <input type="checkbox" id="worker_${worker.id}" value="${worker.id}" onchange="updateWorkerCount()">
+                        <label for="worker_${worker.id}">
+                            <div>${worker.nama}</div>
+                            <div class="worker-position">${worker.keterangan || 'Pekerja'}</div>
+                        </label>
+                    </div>
+                `;
+            });
+
+            // centang yang sudah dipilih
+            selectedWorkers.forEach(id => {
+                const cb = document.getElementById(`worker_${id}`);
+                if(cb) cb.checked = true;
+            });
+        }
+
+        window.filterWorkers = function() {
+            const searchTerm = document.getElementById('workerSearch').value.toLowerCase();
+            
+            let filtered = allWorkers
+                .filter(w => w.nama.toLowerCase().includes(searchTerm))
+                .slice(0,5); // batasi 5 hasil
+            
+            displayWorkers(filtered);
+        };
+
+        async function addTeam() {
+            const teamId = document.getElementById('teamSelect').value;
+            if (!teamId) {
+                alert('Pilih tim terlebih dahulu');
+                return;
+            }
+
+            const teamDoc = await getDoc(doc(db, "tim_pekerja", teamId));
+
+            if (!teamDoc.exists()) {
+                alert("Data tim tidak ditemukan");
+                return;
+            }
+
+            const dataTim = teamDoc.data();
+            const pekerjaTim = dataTim.pekerja || [];
+
+            pekerjaTim.forEach(member => {
+                const checkbox = document.getElementById(`worker_${member.id}`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+
+            updateWorkerCount();
+        }
+
+        window.addTeam = addTeam;
+
+        function updateWorkerCount() {
+            const checkboxes = document.querySelectorAll(
+                '#workerSelection input[type="checkbox"]:checked'
+            );
+
+            selectedWorkers = Array.from(checkboxes).map(cb => cb.value);
+
+            const countText = document.getElementById('workerCountText');
+            if (countText) {
+                const jumlah = selectedWorkers.length;
+                countText.textContent = `${jumlah} pekerja dipilih`;
+            }
+        }
+
+        window.updateWorkerCount = updateWorkerCount;
+
+        document.getElementById('projectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const lokasi = document.getElementById('lokasi').value.trim();
+            if (!lokasi) {
+                alert('Silakan masukkan lokasi proyek');
+                return;
+            }
+
+            if (selectedWorkers.length === 0) {
+                alert('Pilih minimal 1 pekerja');
+                return;
+            }
+
+            const supervisorUid = document.getElementById('supervisor').value;
+
+            const q = query(
+                collection(db, "supervisors"),
+                where("uid", "==", supervisorUid)
+            );
+
+            const snap = await getDocs(q);
+
+            if (snap.empty) {
+                alert("Supervisor tidak ditemukan");
+                return;
+            }
+
+            const supervisorData = snap.docs[0].data();
+
+            const pekerjaDipilih = [];
+            for (const workerId of selectedWorkers) {
+                const workerDoc = await getDoc(doc(db, "pekerja", workerId));
+                if (workerDoc.exists()) {
+                    pekerjaDipilih.push({ id: workerDoc.id, nama: workerDoc.data().nama });
+                }
+            }
+
+            await addDoc(collection(db, "projects"), {
+                namaProyek: document.getElementById('namaProyek').value,
+                namaClient: document.getElementById('namaClient').value,
+                tanggalMulai: document.getElementById('tanggalMulai').value,
+                tenggat: document.getElementById('tenggat').value,
+
+                supervisor: {
+                    id: supervisorUid,
+                    nama: supervisorData.nama
+                },
+
+                pekerja: pekerjaDipilih,
+                jumlahPekerja: pekerjaDipilih.length,
+                lokasi: lokasi,
+                deskripsi: document.getElementById('deskripsi').value,
+                status: "dalam pengerjaan",
+                createdAt: new Date()
+            });
+
+            closeModal();
+            loadProjects();
+        });
+
+        async function loadProjects() {
+            const projectList = document.getElementById('projectList');
+            projectList.innerHTML = '';
+
+            const snap = await getDocs(collection(db, "projects"));
+
+            const activeProjects = snap.docs.filter(doc => {
+                const d = doc.data();
+                return d.status !== "selesai" && d.status !== "telat";
+            });
+
+            allProjects = activeProjects;
+
+            if (activeProjects.length === 0) {
+                projectList.innerHTML = `
+            <div class="empty-state">
+                <i data-feather="folder"></i>
+                <p>Tidak ada proyek aktif.</p>
+            </div>
+        `;
+                feather.replace();
+                return;
+            }
+
+            await displayProjects(activeProjects);
+        }
+
+        async function displayProjects(projects) {
+            const projectList = document.getElementById('projectList');
+            projectList.innerHTML = '';
+
+            if (projects.length === 0) {
+                projectList.innerHTML = `
+                    <div class="empty-state">
+                        <i data-feather="search"></i>
+                        <p>Proyek tidak ditemukan.</p>
+                    </div>
+                `;
+                feather.replace();
+                return;
+            }
+
+            const projectCards = [];
+
+            for (const document of projects) {
+                const d = document.data();
+                const alamat = d.lokasi || "-";
+
+                // Tentukan teks status
+                let statusBadge = '';
+                if(d.status === "dalam pengerjaan") {
+                    statusBadge = `<span class="badge proses">Dalam Pengerjaan</span>`;
+                } else if(d.status === "selesai") {
+                    statusBadge = `<span class="badge selesai">Selesai</span>`;
+                } else {
+                    statusBadge = `<span class="badge">${d.status}</span>`;
+                }
+
+                projectCards.push(`
+                    <a href="detail_proyek.html?id=${document.id}" class="project-card" style="text-decoration: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div style="font-size: 16px; font-weight: 600; color: #1a1a1a;">
+                                ${d.namaProyek}
+                            </div>
+                            <i data-feather="chevron-right" style="color: #999;"></i>
+                        </div>
+
+                        <div class="project-client">${d.namaClient}</div>
+
+                        <div class="project-location">
+                            <i data-feather="map-pin"></i>
+                            <span>${alamat}</span>
+                        </div>
+
+                        <div class="project-info">
+                            <div class="info-item">
+                                <div class="info-label">Supervisor</div>
+                                <div class="info-value">${d.supervisor?.nama || '-'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Jumlah Pekerja</div>
+                                <div class="info-value">${d.jumlahPekerja}</div>
+                            </div>
+                        </div>
+
+                        <div class="status-badge" style="margin-top: 16px;">
+                            ${statusBadge}
+                        </div>
+                    </a>
+                `);
+            }
+
+            projectList.innerHTML = projectCards.join('');
+            feather.replace();
+        }
+
+        function searchProjects() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            // Filter berdasarkan nama proyek
+            let filteredProjects = allProjects.filter(doc => {
+                const d = doc.data();
+                return d.namaProyek.toLowerCase().includes(searchTerm);
+            });
+
+            // Hapus duplikat berdasarkan ID proyek
+            const seenIds = new Set();
+            filteredProjects = filteredProjects.filter(doc => {
+                if (seenIds.has(doc.id)) return false;
+                seenIds.add(doc.id);
+                return true;
+            });
+
+            displayProjects(filteredProjects);
+        }
+
+        window.searchProjects = searchProjects;
+
+        setInterval(() => {
+            loadProjects();
+        }, 60000);
+    </script>
+</body>
+
+</html>
