@@ -779,7 +779,7 @@
                     return;
                 }
 
-                await sendPasswordResetEmail(auth, emailTarget(), {
+                await sendPasswordResetEmail(auth, emailTarget, {
                     url: window.location.origin + "/supervisor_lapangan.html",
                     handleCodeInApp: false
                 });
