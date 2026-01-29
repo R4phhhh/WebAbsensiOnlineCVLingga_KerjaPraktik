@@ -682,6 +682,7 @@
                 <div class="form-group">
                     <label for="tenggat" class="required">Tenggat Proyek</label>
                     <input type="date" id="tenggat" required>
+                    <small id="tenggat-info" style="color: #999; font-size: 12px; margin-top: 4px; display: block;">Pilih tanggal mulai terlebih dahulu</small>
                 </div>
 
                 <div class="form-group">
@@ -802,6 +803,32 @@
             document.getElementById('projectModal').classList.add('show');
             loadFormData();
             document.getElementById('workerCountText').textContent = '0 pekerja dipilih';
+            
+            const tanggalMulaiInput = document.getElementById('tanggalMulai');
+            const tenggitInput = document.getElementById('tenggat');
+            const tenggitInfo = document.getElementById('tenggat-info');
+            
+            // Disable tenggat pada awalnya
+            tenggitInput.disabled = true;
+            tenggitInput.value = '';
+            tenggitInfo.style.display = 'block';
+            
+            tanggalMulaiInput.addEventListener('change', () => {
+                if (tanggalMulaiInput.value) {
+                    // Enable tenggat input
+                    tenggitInput.disabled = false;
+                    tenggitInfo.style.display = 'none';
+                    // Set min date untuk tenggat menjadi hari setelah tanggal mulai
+                    const nextDay = new Date(tanggalMulaiInput.value);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    tenggitInput.min = nextDay.toISOString().split('T')[0];
+                } else {
+                    // Disable tenggat jika tanggal mulai dikosongkan
+                    tenggitInput.disabled = true;
+                    tenggitInput.value = '';
+                    tenggitInfo.style.display = 'block';
+                }
+            });
         }
 
         window.openModal = openModal;
@@ -940,62 +967,84 @@
         document.getElementById('projectForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const lokasi = document.getElementById('lokasi').value.trim();
-            if (!lokasi) {
-                alert('Silakan masukkan lokasi proyek');
-                return;
-            }
+            const submitBtn = document.querySelector('.btn-submit');
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.6';
+            submitBtn.style.cursor = 'not-allowed';
 
-            if (selectedWorkers.length === 0) {
-                alert('Pilih minimal 1 pekerja');
-                return;
-            }
-
-            const supervisorUid = document.getElementById('supervisor').value;
-
-            const q = query(
-                collection(db, "supervisors"),
-                where("uid", "==", supervisorUid)
-            );
-
-            const snap = await getDocs(q);
-
-            if (snap.empty) {
-                alert("Supervisor tidak ditemukan");
-                return;
-            }
-
-            const supervisorData = snap.docs[0].data();
-
-            const pekerjaDipilih = [];
-            for (const workerId of selectedWorkers) {
-                const workerDoc = await getDoc(doc(db, "pekerja", workerId));
-                if (workerDoc.exists()) {
-                    pekerjaDipilih.push({ id: workerDoc.id, nama: workerDoc.data().nama });
+            try {
+                const lokasi = document.getElementById('lokasi').value.trim();
+                if (!lokasi) {
+                    alert('Silakan masukkan lokasi proyek');
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.style.cursor = 'pointer';
+                    return;
                 }
+
+                if (selectedWorkers.length === 0) {
+                    alert('Pilih minimal 1 pekerja');
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.style.cursor = 'pointer';
+                    return;
+                }
+
+                const supervisorUid = document.getElementById('supervisor').value;
+
+                const q = query(
+                    collection(db, "supervisors"),
+                    where("uid", "==", supervisorUid)
+                );
+
+                const snap = await getDocs(q);
+
+                if (snap.empty) {
+                    alert("Supervisor tidak ditemukan");
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.style.cursor = 'pointer';
+                    return;
+                }
+
+                const supervisorData = snap.docs[0].data();
+
+                const pekerjaDipilih = [];
+                for (const workerId of selectedWorkers) {
+                    const workerDoc = await getDoc(doc(db, "pekerja", workerId));
+                    if (workerDoc.exists()) {
+                        pekerjaDipilih.push({ id: workerDoc.id, nama: workerDoc.data().nama });
+                    }
+                }
+
+                await addDoc(collection(db, "projects"), {
+                    namaProyek: document.getElementById('namaProyek').value,
+                    namaClient: document.getElementById('namaClient').value,
+                    tanggalMulai: document.getElementById('tanggalMulai').value,
+                    tenggat: document.getElementById('tenggat').value,
+
+                    supervisor: {
+                        id: supervisorUid,
+                        nama: supervisorData.nama
+                    },
+
+                    pekerja: pekerjaDipilih,
+                    jumlahPekerja: pekerjaDipilih.length,
+                    lokasi: lokasi,
+                    deskripsi: document.getElementById('deskripsi').value,
+                    status: "dalam pengerjaan",
+                    createdAt: new Date()
+                });
+
+                closeModal();
+                loadProjects();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan proyek');
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
             }
-
-            await addDoc(collection(db, "projects"), {
-                namaProyek: document.getElementById('namaProyek').value,
-                namaClient: document.getElementById('namaClient').value,
-                tanggalMulai: document.getElementById('tanggalMulai').value,
-                tenggat: document.getElementById('tenggat').value,
-
-                supervisor: {
-                    id: supervisorUid,
-                    nama: supervisorData.nama
-                },
-
-                pekerja: pekerjaDipilih,
-                jumlahPekerja: pekerjaDipilih.length,
-                lokasi: lokasi,
-                deskripsi: document.getElementById('deskripsi').value,
-                status: "dalam pengerjaan",
-                createdAt: new Date()
-            });
-
-            closeModal();
-            loadProjects();
         });
 
         async function loadProjects() {

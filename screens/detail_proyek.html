@@ -664,6 +664,7 @@
                 <div class="form-group">
                     <label>Tenggat Proyek</label>
                     <input type="date" id="editTenggat" required>
+                    <small id="editTenggat-info" style="color: #999; font-size: 12px; margin-top: 4px; display: none;">Pilih tanggal mulai terlebih dahulu</small>
                 </div>
 
                 <div class="form-group">
@@ -1025,6 +1026,41 @@
             document.getElementById('editTenggat').value = projectData.tenggat;
             document.getElementById('editDeskripsi').value = projectData.deskripsi || '';
             document.getElementById('editLokasi').value = projectData.lokasi || '';
+            
+            // Setup tanggal validation dengan min date restriction untuk tenggat saja
+            const editTanggalMulaiInput = document.getElementById('editTanggalMulai');
+            const editTenggitInput = document.getElementById('editTenggat');
+            const editTenggitInfo = document.getElementById('editTenggat-info');
+            
+            // Check jika sudah ada nilai, jangan disable
+            if (!editTanggalMulaiInput.value) {
+                editTenggitInput.disabled = true;
+                editTenggitInfo.style.display = 'block';
+            } else {
+                editTenggitInput.disabled = false;
+                editTenggitInfo.style.display = 'none';
+            }
+            
+            editTanggalMulaiInput.addEventListener('change', () => {
+                if (editTanggalMulaiInput.value) {
+                    editTenggitInput.disabled = false;
+                    editTenggitInfo.style.display = 'none';
+
+                    const nextDay = new Date(editTanggalMulaiInput.value);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    editTenggitInput.min = nextDay.toISOString().split('T')[0];
+                } else {
+                    editTenggitInput.disabled = true;
+                    editTenggitInput.value = '';
+                    editTenggitInfo.style.display = 'block';
+                }
+            });
+            
+            if (editTanggalMulaiInput.value) {
+                const nextDay = new Date(editTanggalMulaiInput.value);
+                nextDay.setDate(nextDay.getDate() + 1);
+                editTenggitInput.min = nextDay.toISOString().split('T')[0];
+            }
 
             selectedWorkers = projectData.pekerja
                 ? projectData.pekerja.map(p => p.id)
@@ -1193,39 +1229,55 @@
         document.getElementById('editForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            if (selectedWorkers.length === 0) {
-                alert('Pilih minimal 1 pekerja');
-                return;
-            }
+            const submitBtn = document.querySelector('#editModal .btn-submit');
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.6';
+            submitBtn.style.cursor = 'not-allowed';
 
-            const supervisorId = document.getElementById('editSupervisor').value;
-            const supervisorDoc = await getDoc(doc(db, "supervisors", supervisorId));
-            const supervisorData = supervisorDoc.data();
-
-            const pekerjaDipilih = [];
-            for (const workerId of selectedWorkers) {
-                const workerDoc = await getDoc(doc(db, "pekerja", workerId));
-                if (workerDoc.exists()) {
-                    pekerjaDipilih.push({ id: workerDoc.id, nama: workerDoc.data().nama });
+            try {
+                if (selectedWorkers.length === 0) {
+                    alert('Pilih minimal 1 pekerja');
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.style.cursor = 'pointer';
+                    return;
                 }
+
+                const supervisorId = document.getElementById('editSupervisor').value;
+                const supervisorDoc = await getDoc(doc(db, "supervisors", supervisorId));
+                const supervisorData = supervisorDoc.data();
+
+                const pekerjaDipilih = [];
+                for (const workerId of selectedWorkers) {
+                    const workerDoc = await getDoc(doc(db, "pekerja", workerId));
+                    if (workerDoc.exists()) {
+                        pekerjaDipilih.push({ id: workerDoc.id, nama: workerDoc.data().nama });
+                    }
+                }
+
+                await updateDoc(doc(db, "projects", projectId), {
+                    namaProyek: document.getElementById('editNamaProyek').value,
+                    namaClient: document.getElementById('editNamaClient').value,
+                    tanggalMulai: document.getElementById('editTanggalMulai').value,
+                    tenggat: document.getElementById('editTenggat').value,
+                    supervisor: { id: supervisorData.uid, nama: supervisorData.nama },
+                    pekerja: pekerjaDipilih,
+                    jumlahPekerja: pekerjaDipilih.length,
+                    lokasi: document.getElementById('editLokasi').value,
+                    deskripsi: document.getElementById('editDeskripsi').value,
+                });
+
+                alert('Proyek berhasil diperbarui');
+                closeEditModal();
+                document.getElementById('pekerjaSearch').value = '';
+                loadProject();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan perubahan');
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
             }
-
-            await updateDoc(doc(db, "projects", projectId), {
-                namaProyek: document.getElementById('editNamaProyek').value,
-                namaClient: document.getElementById('editNamaClient').value,
-                tanggalMulai: document.getElementById('editTanggalMulai').value,
-                tenggat: document.getElementById('editTenggat').value,
-                supervisor: { id: supervisorData.uid, nama: supervisorData.nama },
-                pekerja: pekerjaDipilih,
-                jumlahPekerja: pekerjaDipilih.length,
-                lokasi: document.getElementById('editLokasi').value,
-                deskripsi: document.getElementById('editDeskripsi').value,
-            });
-
-            alert('Proyek berhasil diperbarui');
-            closeEditModal();
-            document.getElementById('pekerjaSearch').value = '';
-            loadProject();
         });
 
         setInterval(() => {
